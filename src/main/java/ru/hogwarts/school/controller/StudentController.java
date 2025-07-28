@@ -1,42 +1,50 @@
 package ru.hogwarts.school.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
-import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/student")
 public class StudentController {
-    private final StudentService service;
 
-    public StudentController(StudentService service) {
-        this.service = service;
+    private final StudentService studentService;
+
+    @Autowired
+    public StudentController(StudentService studentService) {
+        this.studentService = studentService;
     }
 
     @PostMapping
     public Student create(@RequestBody Student student) {
-        return service.create(student);
+        return studentService.create(student);
     }
 
     @GetMapping("/{id}")
-    public Student get(@PathVariable Long id) {
-        return service.get(id);
+    public Student getById(@PathVariable Long id) {
+        return studentService.getById(id);
+    }
+
+    @GetMapping
+    public List<Student> getAll() {
+        return studentService.getAll();
     }
 
     @PutMapping
     public Student update(@RequestBody Student student) {
-        return service.update(student);
+        return studentService.update(student);
     }
 
     @DeleteMapping("/{id}")
-    public Student delete(@PathVariable Long id) {
-        return service.delete(id);
+    public void delete(@PathVariable Long id) {
+        studentService.delete(id);
     }
 
     @GetMapping("/age/{age}")
-    public Collection<Student> findByAge(@PathVariable int age) {
-        return service.findByAge(age);
+    public List<Student> getByAge(@PathVariable int age) {
+        return studentService.getByAge(age);
     }
 }
