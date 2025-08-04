@@ -9,7 +9,6 @@ import ru.hogwarts.school.exceptions.FacultyNotFoundException;
 import ru.hogwarts.school.mapper.FacultyMapper;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.repository.FacultyRepository;
-import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,14 +17,11 @@ import java.util.stream.Collectors;
 @Transactional
 public class FacultyService {
     private final FacultyRepository facultyRepository;
-    private final StudentRepository studentRepository;
     private final FacultyMapper mapper;
 
     public FacultyService(FacultyRepository facultyRepository,
-                          StudentRepository studentRepository,
                           FacultyMapper mapper) {
         this.facultyRepository = facultyRepository;
-        this.studentRepository = studentRepository;
         this.mapper = mapper;
     }
 
