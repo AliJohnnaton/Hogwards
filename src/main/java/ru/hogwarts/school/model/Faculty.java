@@ -1,27 +1,23 @@
 package ru.hogwarts.school.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Table(name = "faculties")
 public class Faculty {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     private String color;
 
-    public Faculty() {
-    }
-
-    public Faculty(String name, String color) {
-        this.name = name;
-        this.color = color;
-    }
+    @OneToMany(mappedBy = "faculty", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<Student> students = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -45,5 +41,9 @@ public class Faculty {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public Set<Student> getStudents() {
+        return students;
     }
 }

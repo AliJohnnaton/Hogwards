@@ -1,50 +1,57 @@
 package ru.hogwarts.school.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.dto.FacultyRequestDto;
+import ru.hogwarts.school.dto.FacultyResponseDto;
+import ru.hogwarts.school.dto.StudentResponseDto;
 import ru.hogwarts.school.service.FacultyService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/faculty")
+@RequestMapping("/faculties")
 public class FacultyController {
+    private final FacultyService service;
 
-    private final FacultyService facultyService;
-
-    @Autowired
-    public FacultyController(FacultyService facultyService) {
-        this.facultyService = facultyService;
+    public FacultyController(FacultyService service) {
+        this.service = service;
     }
 
     @PostMapping
-    public Faculty create(@RequestBody Faculty faculty) {
-        return facultyService.create(faculty);
+    public ResponseEntity<FacultyResponseDto> create(@RequestBody FacultyRequestDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
     @GetMapping("/{id}")
-    public Faculty getById(@PathVariable Long id) {
-        return facultyService.getById(id);
+    public ResponseEntity<FacultyResponseDto> read(@PathVariable Long id) {
+        return ResponseEntity.ok(service.read(id));
     }
 
-    @GetMapping
-    public List<Faculty> getAll() {
-        return facultyService.getAll();
-    }
-
-    @PutMapping
-    public Faculty update(@RequestBody Faculty faculty) {
-        return facultyService.update(faculty);
+    @PutMapping("/{id}")
+    public ResponseEntity<FacultyResponseDto> update(@PathVariable Long id, @RequestBody FacultyRequestDto dto) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        facultyService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/color/{color}")
-    public List<Faculty> getByColor(@PathVariable String color) {
-        return facultyService.getByColor(color);
+    @GetMapping
+    public ResponseEntity<List<FacultyResponseDto>> getAll() {
+        return ResponseEntity.ok(service.getAll());
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<FacultyResponseDto>> filter(@RequestParam String query) {
+        return ResponseEntity.ok(service.findByNameOrColor(query));
+    }
+
+    @GetMapping("/{id}/students")
+    public ResponseEntity<List<StudentResponseDto>> getStudents(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getStudentsByFacultyId(id));
     }
 }
