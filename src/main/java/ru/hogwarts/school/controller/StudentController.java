@@ -1,50 +1,62 @@
 package ru.hogwarts.school.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.dto.FacultyResponseDto;
+import ru.hogwarts.school.dto.StudentRequestDto;
+import ru.hogwarts.school.dto.StudentResponseDto;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/student")
+@RequestMapping("/students")
 public class StudentController {
+    private final StudentService service;
 
-    private final StudentService studentService;
-
-    @Autowired
-    public StudentController(StudentService studentService) {
-        this.studentService = studentService;
+    public StudentController(StudentService service) {
+        this.service = service;
     }
 
     @PostMapping
-    public Student create(@RequestBody Student student) {
-        return studentService.create(student);
+    public ResponseEntity<StudentResponseDto> create(@RequestBody StudentRequestDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
     @GetMapping("/{id}")
-    public Student getById(@PathVariable Long id) {
-        return studentService.getById(id);
+    public ResponseEntity<StudentResponseDto> read(@PathVariable Long id) {
+        return ResponseEntity.ok(service.read(id));
     }
 
-    @GetMapping
-    public List<Student> getAll() {
-        return studentService.getAll();
-    }
-
-    @PutMapping
-    public Student update(@RequestBody Student student) {
-        return studentService.update(student);
+    @PutMapping("/{id}")
+    public ResponseEntity<StudentResponseDto> update(@PathVariable Long id, @RequestBody StudentRequestDto dto) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        studentService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/age/{age}")
-    public List<Student> getByAge(@PathVariable int age) {
-        return studentService.getByAge(age);
+    @GetMapping
+    public ResponseEntity<Page<StudentResponseDto>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(service.getAll(page, size));
+    }
+
+    @GetMapping("/age-between")
+    public ResponseEntity<List<StudentResponseDto>> findByAgeBetween(
+            @RequestParam int min,
+            @RequestParam int max) {
+        return ResponseEntity.ok(service.findByAgeBetween(min, max));
+    }
+
+    @GetMapping("/{id}/faculty")
+    public ResponseEntity<FacultyResponseDto> getFaculty(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getFacultyByStudentId(id));
     }
 }
