@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.dto.FacultyResponseDto;
 import ru.hogwarts.school.dto.StudentRequestDto;
 import ru.hogwarts.school.dto.StudentResponseDto;
+import ru.hogwarts.school.exceptions.FacultyNotFoundException;
+import ru.hogwarts.school.exceptions.StudentNotFoundException;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.List;
@@ -58,5 +60,14 @@ public class StudentController {
     @GetMapping("/{id}/faculty")
     public ResponseEntity<FacultyResponseDto> getFaculty(@PathVariable Long id) {
         return ResponseEntity.ok(service.getFacultyByStudentId(id));
+    }
+    @ExceptionHandler(StudentNotFoundException.class)
+    public ResponseEntity<String> handleStudentNotFound(StudentNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(FacultyNotFoundException.class)
+    public ResponseEntity<String> handleFacultyNotFound(FacultyNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }
