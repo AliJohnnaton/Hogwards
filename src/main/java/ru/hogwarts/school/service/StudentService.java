@@ -81,4 +81,16 @@ public class StudentService {
         }
         return new FacultyResponseDto(faculty.getId(), faculty.getName(), faculty.getColor(), faculty.getStudents().stream().map(Student::getId).toList());
     }
+
+    public long getStudentCount() {
+        return studentRepository.countAllStudents();
+    }
+
+    public Double getAverageAge() {
+        return studentRepository.getAverageAge();
+    }
+
+    public List<StudentResponseDto> getLastFiveStudents() {
+        return studentRepository.findLastFiveStudents().stream().map(mapper::toDto).toList();
+    }
 }
