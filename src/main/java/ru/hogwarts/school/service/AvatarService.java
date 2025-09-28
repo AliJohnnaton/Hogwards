@@ -2,6 +2,7 @@ package ru.hogwarts.school.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,6 @@ public class AvatarService {
     }
 
     public Avatar uploadAvatar(Long studentId, MultipartFile file) throws IOException {
-        // Проверка формата - только PNG
         if (!"image/png".equals(file.getContentType())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -184,5 +184,10 @@ public class AvatarService {
 
     public Path getAvatarPath(Long studentId) {
         return Paths.get(getAvatarByStudentId(studentId).getFilePath());
+    }
+
+    public Page<Avatar> getAllAvatars(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return avatarRepository.findAll(pageRequest);
     }
 }
