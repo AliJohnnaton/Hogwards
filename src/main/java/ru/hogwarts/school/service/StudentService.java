@@ -1,6 +1,8 @@
 package ru.hogwarts.school.service;
 
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -20,12 +22,16 @@ import java.util.List;
 @Service
 @Transactional
 public class StudentService {
+
+    private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
+
     private final StudentRepository studentRepository;
     private final FacultyRepository facultyRepository;
     private final AvatarRepository avatarRepository;
     private final StudentMapper mapper;
 
-    public StudentService(StudentRepository repository, FacultyRepository facultyRepository, AvatarRepository avatarRepository, StudentMapper mapper) {
+    public StudentService(StudentRepository repository, FacultyRepository facultyRepository,
+                          AvatarRepository avatarRepository, StudentMapper mapper) {
         this.studentRepository = repository;
         this.facultyRepository = facultyRepository;
         this.avatarRepository = avatarRepository;
@@ -33,64 +39,110 @@ public class StudentService {
     }
 
     public StudentResponseDto create(StudentRequestDto dto) {
+        logger.info("Was invoked method for create student");
         Student student = mapper.toEntity(dto);
         if (dto.getFacultyId() != null) {
             Faculty faculty = facultyRepository.findById(dto.getFacultyId()).orElseThrow();
             student.setFaculty(faculty);
+            logger.debug("Assigning faculty id {} to new student", dto.getFacultyId());
         }
-        return mapper.toDto(studentRepository.save(student));
+        Student saved = studentRepository.save(student);
+        logger.debug("Created student with id {}", saved.getId());
+        return mapper.toDto(saved);
     }
 
     public StudentResponseDto read(Long id) {
-        return studentRepository.findById(id).map(mapper::toDto).orElseThrow();
+        logger.info("Was invoked method for read student with id {}", id);
+        return studentRepository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> {
+                    logger.error("No student found with id {}", id);
+                    return new RuntimeException("Student not found");
+                });
     }
 
     public StudentResponseDto update(Long id, StudentRequestDto dto) {
-        Student existing = studentRepository.findById(id).orElseThrow();
+        logger.info("Was invoked method for update student with id {}", id);
+        Student existing = studentRepository.findById(id).orElseThrow(() -> {
+            logger.error("No student found with id {}", id);
+            return new RuntimeException("Student not found");
+        });
         existing.setName(dto.getName());
         existing.setAge(dto.getAge());
         if (dto.getFacultyId() != null) {
             Faculty faculty = facultyRepository.findById(dto.getFacultyId()).orElseThrow();
             existing.setFaculty(faculty);
+            logger.debug("Updated faculty for student id {} to faculty id {}", id, dto.getFacultyId());
         } else {
             existing.setFaculty(null);
+            logger.debug("Removed faculty from student id {}", id);
         }
-        return mapper.toDto(studentRepository.save(existing));
+        Student saved = studentRepository.save(existing);
+        logger.debug("Updated student with id {}", saved.getId());
+        return mapper.toDto(saved);
     }
 
     public void delete(Long id) {
-        Student student = studentRepository.findById(id).orElseThrow();
+        logger.info("Was invoked method for delete student with id {}", id);
+        Student student = studentRepository.findById(id).orElseThrow(() -> {
+            logger.error("No student found with id {}", id);
+            return new RuntimeException("Student not found");
+        });
         if (student.getAvatar() != null) {
             avatarRepository.delete(student.getAvatar());
+            logger.debug("Deleted avatar for student id {}", id);
         }
         studentRepository.delete(student);
+        logger.debug("Deleted student with id {}", id);
     }
 
     public Page<StudentResponseDto> getAll(int page, int size) {
-        return studentRepository.findAll(PageRequest.of(page, size)).map(mapper::toDto);
+        logger.info("Was invoked method for getAll students, page={}, size={}", page, size);
+        Page<StudentResponseDto> result = studentRepository.findAll(PageRequest.of(page, size)).map(mapper::toDto);
+        logger.debug("Returning {} students", result.getContent().size());
+        return result;
     }
 
     public List<StudentResponseDto> findByAgeBetween(int min, int max) {
-        return studentRepository.findByAgeBetween(min, max).stream().map(mapper::toDto).toList();
+        logger.info("Was invoked method for findByAgeBetween: min={}, max={}", min, max);
+        List<StudentResponseDto> result = studentRepository.findByAgeBetween(min, max).stream().map(mapper::toDto).toList();
+        logger.debug("Found {} students", result.size());
+        return result;
     }
 
     public FacultyResponseDto getFacultyByStudentId(Long studentId) {
-        Faculty faculty = studentRepository.findById(studentId).orElseThrow().getFaculty();
+        logger.info("Was invoked method for getFacultyByStudentId: {}", studentId);
+        Student student = studentRepository.findById(studentId).orElseThrow(() -> {
+            logger.error("No student found with id {}", studentId);
+            return new RuntimeException("Student not found");
+        });
+        Faculty faculty = student.getFaculty();
         if (faculty == null) {
+            logger.warn("Student id {} has no faculty", studentId);
             throw new FacultyNotFoundException("Student has no faculty");
         }
+        logger.debug("Returning faculty id {} for student id {}", faculty.getId(), studentId);
         return new FacultyResponseDto(faculty.getId(), faculty.getName(), faculty.getColor(), faculty.getStudents().stream().map(Student::getId).toList());
     }
 
     public long getStudentCount() {
-        return studentRepository.countAllStudents();
+        logger.info("Was invoked method for getStudentCount");
+        long count = studentRepository.countAllStudents();
+        logger.debug("Total student count: {}", count);
+        return count;
     }
 
     public Double getAverageAge() {
-        return studentRepository.getAverageAge();
+        logger.info("Was invoked method for getAverageAge");
+        Double avg = studentRepository.getAverageAge();
+        logger.debug("Average age of students: {}", avg);
+        return avg;
     }
 
     public List<StudentResponseDto> getLastFiveStudents() {
-        return studentRepository.findLastFiveStudents().stream().map(mapper::toDto).toList();
+        logger.info("Was invoked method for getLastFiveStudents");
+        List<StudentResponseDto> result = studentRepository.findLastFiveStudents().stream().map(mapper::toDto).toList();
+        logger.debug("Returning {} students", result.size());
+        return result;
     }
 }
