@@ -17,24 +17,25 @@ import ru.hogwarts.school.service.FacultyService;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class FacultyControllerWebMvcTest {
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final FacultyResponseDto facultyResponse = new FacultyResponseDto(1L, "Гриффиндор",
+            "красный", List.of());
+    private final StudentResponseDto studentResponse = new StudentResponseDto(1L, "Гарри Поттер", 17,
+            1L);
     private MockMvc mockMvc;
-
     @Mock
     private FacultyService facultyService;
-
     @InjectMocks
     private FacultyController facultyController;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final FacultyResponseDto facultyResponse = new FacultyResponseDto(1L, "Гриффиндор", "красный", List.of());
-    private final StudentResponseDto studentResponse = new StudentResponseDto(1L, "Гарри Поттер", 17, 1L);
 
     @BeforeEach
     void setUp() {
@@ -87,7 +88,8 @@ class FacultyControllerWebMvcTest {
         requestDto.setName("Гриффиндор");
         requestDto.setColor("алый");
 
-        FacultyResponseDto updatedResponse = new FacultyResponseDto(1L, "Гриффиндор", "алый", List.of());
+        FacultyResponseDto updatedResponse = new FacultyResponseDto(1L, "Гриффиндор", "алый",
+                List.of());
         when(facultyService.update(eq(1L), any(FacultyRequestDto.class))).thenReturn(updatedResponse);
 
         mockMvc.perform(put("/faculties/1")
@@ -142,4 +144,45 @@ class FacultyControllerWebMvcTest {
                 .andExpect(content().contentType(MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"))
                 .andExpect(content().string("Факультет с ID:999 не найден."));
     }
+
+    @Test
+    void findByNameStartingWithA_ShouldReturnFaculties() throws Exception {
+        // Создаём список DTO с учётом всех полей record
+        List<FacultyResponseDto> faculties = List.of(
+                new FacultyResponseDto(1L, "Arts", null, List.of()),
+                new FacultyResponseDto(2L, "Architecture", null, List.of())
+        );
+
+        // Мокаем сервис, чтобы он возвращал этот список
+        when(facultyService.findByNameStartingWithA()).thenReturn(faculties);
+
+        // Выполняем GET-запрос к контроллеру
+        mockMvc.perform(get("/faculties/start-with-a"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].name").value("Arts"))
+                .andExpect(jsonPath("$[0].color").isEmpty())
+                .andExpect(jsonPath("$[0].studentIds").isEmpty())
+                .andExpect(jsonPath("$[1].id").value(2L))
+                .andExpect(jsonPath("$[1].name").value("Architecture"))
+                .andExpect(jsonPath("$[1].color").isEmpty())
+                .andExpect(jsonPath("$[1].studentIds").isEmpty());
+    }
+
+
+    @Test
+    void getFacultyWithLongestName_ShouldReturnFaculty() throws Exception {
+        FacultyResponseDto longest = new FacultyResponseDto(3L, "СупердлинноеИмяФакультета", "зелёный",
+                List.of());
+        when(facultyService.getFacultyWithLongestName()).thenReturn(longest);
+
+        mockMvc.perform(get("/faculties/longest-name"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(3L))
+                .andExpect(jsonPath("$.name").value("СупердлинноеИмяФакультета"))
+                .andExpect(jsonPath("$.color").value("зелёный"))
+                .andExpect(jsonPath("$.studentIds").isEmpty());
+    }
+
+
 }

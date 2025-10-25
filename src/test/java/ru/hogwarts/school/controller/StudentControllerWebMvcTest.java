@@ -30,8 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class StudentControllerWebMvcTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final StudentResponseDto studentResponse = new StudentResponseDto(1L, "Гарри Поттер", 17, null);
-    private final FacultyResponseDto facultyResponse = new FacultyResponseDto(1L, "Гриффиндор", "красный", List.of());
+    private final StudentResponseDto studentResponse = new StudentResponseDto(1L, "Гарри Поттер",
+            17, null);
+    private final FacultyResponseDto facultyResponse = new FacultyResponseDto(1L, "Гриффиндор",
+            "красный", List.of());
     private MockMvc mockMvc;
     @Mock
     private StudentService studentService;
@@ -79,7 +81,8 @@ class StudentControllerWebMvcTest {
         requestDto.setName("Гарри Поттер");
         requestDto.setAge(18);
 
-        StudentResponseDto updatedResponse = new StudentResponseDto(1L, "Гарри Поттер", 18, null);
+        StudentResponseDto updatedResponse = new StudentResponseDto(1L, "Гарри Поттер", 18,
+                null);
         when(studentService.update(eq(1L), any(StudentRequestDto.class))).thenReturn(updatedResponse);
 
         mockMvc.perform(put("/students/1")
@@ -99,7 +102,8 @@ class StudentControllerWebMvcTest {
 
     @Test
     void getAll_ShouldReturnPageOfStudents() throws Exception {
-        Page<StudentResponseDto> page = new PageImpl<>(List.of(studentResponse), PageRequest.of(0, 10), 1);
+        Page<StudentResponseDto> page = new PageImpl<>(List.of(studentResponse), PageRequest.of(0,
+                10), 1);
         when(studentService.getAll(0, 10)).thenReturn(page);
 
         mockMvc.perform(get("/students?page=0&size=10"))
@@ -134,4 +138,35 @@ class StudentControllerWebMvcTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Student has no faculty"));
     }
+
+    @Test
+    void averageAge_ShouldReturnDouble() throws Exception {
+        when(studentService.getAverageAge()).thenReturn(21.5);
+
+        mockMvc.perform(get("/students/average-age"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("21.5"));
+    }
+
+    @Test
+    void lastFiveStudents_ShouldReturnList() throws Exception {
+        StudentResponseDto s1 = new StudentResponseDto(4L, "Луна", 16, null);
+        StudentResponseDto s2 = new StudentResponseDto(5L, "Драко", 17, null);
+        when(studentService.getLastFiveStudents()).thenReturn(List.of(s1, s2));
+
+        mockMvc.perform(get("/students/last-five"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Луна"))
+                .andExpect(jsonPath("$[1].name").value("Драко"));
+    }
+
+    @Test
+    void getSumOneToMillion_ShouldReturnLong() throws Exception {
+        when(studentService.getSumOneToMillion()).thenReturn(500_000_500_000L);
+
+        mockMvc.perform(get("/students/speed-test"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("500000500000"));
+    }
+
 }

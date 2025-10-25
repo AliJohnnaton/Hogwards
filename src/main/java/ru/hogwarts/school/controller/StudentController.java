@@ -74,4 +74,15 @@ public class StudentController {
     public ResponseEntity<List<StudentResponseDto>> lastFiveStudents() {
         return ResponseEntity.ok(service.getLastFiveStudents());
     }
+
+    @GetMapping("/names-start-with-a")
+    public ResponseEntity<List<String>> getNamesStartingWithA() {
+        return ResponseEntity.ok(service.getNamesStartingWithA());
+    }
+
+    @GetMapping("/speed-test")
+    public ResponseEntity<Long> getSumOneToMillion() {
+        return ResponseEntity.ok(service.getSumOneToMillion());
+    }
+
 }

@@ -18,6 +18,7 @@ import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @Transactional
@@ -105,7 +106,8 @@ public class StudentService {
 
     public List<StudentResponseDto> findByAgeBetween(int min, int max) {
         logger.info("Was invoked method for findByAgeBetween: min={}, max={}", min, max);
-        List<StudentResponseDto> result = studentRepository.findByAgeBetween(min, max).stream().map(mapper::toDto).toList();
+        List<StudentResponseDto> result = studentRepository.findByAgeBetween(min, max).stream().map(mapper::toDto)
+                .toList();
         logger.debug("Found {} students", result.size());
         return result;
     }
@@ -122,7 +124,8 @@ public class StudentService {
             throw new FacultyNotFoundException("Student has no faculty");
         }
         logger.debug("Returning faculty id {} for student id {}", faculty.getId(), studentId);
-        return new FacultyResponseDto(faculty.getId(), faculty.getName(), faculty.getColor(), faculty.getStudents().stream().map(Student::getId).toList());
+        return new FacultyResponseDto(faculty.getId(), faculty.getName(), faculty.getColor(), faculty.getStudents()
+                .stream().map(Student::getId).toList());
     }
 
     public long getStudentCount() {
@@ -145,4 +148,27 @@ public class StudentService {
         logger.debug("Returning {} students", result.size());
         return result;
     }
+
+    public List<String> getNamesStartingWithA() {
+        logger.info("Was invoked method for getNamesStartingWithA");
+        List<String> result = studentRepository.findAll().stream()
+                .map(Student::getName)
+                .filter(name -> name != null && !name.isEmpty())
+                .map(name -> name.toUpperCase(Locale.ROOT))
+                .filter(name -> name.startsWith("A") || name.startsWith("А"))
+                .sorted()
+                .toList();
+        logger.debug("Returning {} names starting with A", result.size());
+        return result;
+    }
+
+    public long getSumOneToMillion() {
+        logger.info("Was invoked method for getSumOneToMillion");
+        long n = 1_000_000L;
+        long sum = n * (n + 1) / 2; // 500_000_500_000
+        logger.debug("Calculated sum from 1 to 1_000_000: {}", sum);
+        return sum;
+    }
+
+
 }
