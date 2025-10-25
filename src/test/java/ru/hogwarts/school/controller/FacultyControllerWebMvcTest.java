@@ -147,16 +147,13 @@ class FacultyControllerWebMvcTest {
 
     @Test
     void findByNameStartingWithA_ShouldReturnFaculties() throws Exception {
-        // Создаём список DTO с учётом всех полей record
         List<FacultyResponseDto> faculties = List.of(
                 new FacultyResponseDto(1L, "Arts", null, List.of()),
                 new FacultyResponseDto(2L, "Architecture", null, List.of())
         );
 
-        // Мокаем сервис, чтобы он возвращал этот список
         when(facultyService.findByNameStartingWithA()).thenReturn(faculties);
 
-        // Выполняем GET-запрос к контроллеру
         mockMvc.perform(get("/faculties/start-with-a"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))

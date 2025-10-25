@@ -18,7 +18,6 @@ class StudentServiceTest {
     @BeforeEach
     void setUp() {
         studentRepository = mock(StudentRepository.class);
-        // Остальные зависимости передаем null, они не нужны для этих методов
         studentService = new StudentService(studentRepository, null, null, null);
     }
 
