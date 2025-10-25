@@ -85,4 +85,13 @@ public class StudentController {
         return ResponseEntity.ok(service.getSumOneToMillion());
     }
 
+    @GetMapping("/print-parallel")
+    public void printParallel() {
+        service.printParallel();
+    }
+
+    @GetMapping("/print-synchronized")
+    public void printSynchronized() {
+        service.printSynchronized();
+    }
 }

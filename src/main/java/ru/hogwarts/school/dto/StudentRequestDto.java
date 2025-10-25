@@ -16,6 +16,15 @@ public class StudentRequestDto {
 
     private Long facultyId;
 
+    public StudentRequestDto() {
+    }
+
+    public StudentRequestDto(String name, int age, Long facultyId) {
+        this.name = name;
+        this.age = age;
+        this.facultyId = facultyId;
+    }
+
     public String getName() {
         return name;
     }
