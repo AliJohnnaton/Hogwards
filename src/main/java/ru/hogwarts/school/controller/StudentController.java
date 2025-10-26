@@ -86,12 +86,14 @@ public class StudentController {
     }
 
     @GetMapping("/print-parallel")
-    public void printParallel() {
+    public ResponseEntity<String> printParallel() {
         service.printParallel();
+        return ResponseEntity.ok("Printed parallel to console");
     }
 
     @GetMapping("/print-synchronized")
-    public void printSynchronized() {
+    public ResponseEntity<String> printSynchronized() {
         service.printSynchronized();
+        return ResponseEntity.ok("Printed synchronized to console");
     }
 }

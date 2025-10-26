@@ -171,57 +171,18 @@ public class StudentService {
     }
 
     public void printParallel() {
-        List<String> names = studentRepository.findAll().stream()
-                .map(Student::getName)
-                .limit(6)
-                .toList();
+        List<String> names = studentRepository.findFirstSixNames();
 
-        names.subList(0, 2).forEach(System.out::println);
+        Thread t1 = new Thread(() -> names.stream().limit(3).forEach(System.out::println));
 
-        Thread t1 = new Thread(() -> names.subList(2, 4).forEach(System.out::println));
-        Thread t2 = new Thread(() -> names.subList(4, 6).forEach(System.out::println));
+        Thread t2 = new Thread(() -> names.stream().skip(3).limit(3).forEach(System.out::println));
 
         t1.start();
         t2.start();
-
-        try {
-            t1.join();
-            t2.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
-    public void printSynchronized() {
-        List<String> names = studentRepository.findAll().stream()
-                .map(Student::getName)
-                .limit(6)
-                .toList();
-
-        synchronized (this) {
-            names.subList(0, 2).forEach(System.out::println);
-        }
-
-        Thread t1 = new Thread(() -> {
-            synchronized (this) {
-                names.subList(2, 4).forEach(System.out::println);
-            }
-        });
-
-        Thread t2 = new Thread(() -> {
-            synchronized (this) {
-                names.subList(4, 6).forEach(System.out::println);
-            }
-        });
-
-        t1.start();
-        t2.start();
-
-        try {
-            t1.join();
-            t2.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public synchronized void printSynchronized() {
+        List<String> names = studentRepository.findFirstSixNames();
+        names.forEach(System.out::println);
     }
 }

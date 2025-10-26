@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import ru.hogwarts.school.dto.StudentResponseDto;
 import ru.hogwarts.school.service.StudentService;
 
@@ -50,20 +51,18 @@ class StudentControllerConsoleTest {
     }
 
     @Test
-    void printParallel_ShouldReturnOk() {
-        doNothing().when(studentService).printParallel();
+    void printParallel_ShouldCallService() {
+        ResponseEntity<String> response = studentController.printParallel();
 
-        studentController.printParallel();
-
+        assertThat(response.getBody()).isEqualTo("Printed parallel to console");
         verify(studentService, times(1)).printParallel();
     }
 
     @Test
-    void printSynchronized_ShouldReturnOk() {
-        doNothing().when(studentService).printSynchronized();
+    void printSynchronized_ShouldCallService() {
+        ResponseEntity<String> response = studentController.printSynchronized();
 
-        studentController.printSynchronized();
-
+        assertThat(response.getBody()).isEqualTo("Printed synchronized to console");
         verify(studentService, times(1)).printSynchronized();
     }
 }
