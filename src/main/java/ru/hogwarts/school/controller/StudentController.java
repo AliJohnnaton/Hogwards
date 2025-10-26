@@ -74,4 +74,26 @@ public class StudentController {
     public ResponseEntity<List<StudentResponseDto>> lastFiveStudents() {
         return ResponseEntity.ok(service.getLastFiveStudents());
     }
+
+    @GetMapping("/names-start-with-a")
+    public ResponseEntity<List<String>> getNamesStartingWithA() {
+        return ResponseEntity.ok(service.getNamesStartingWithA());
+    }
+
+    @GetMapping("/speed-test")
+    public ResponseEntity<Long> getSumOneToMillion() {
+        return ResponseEntity.ok(service.getSumOneToMillion());
+    }
+
+    @GetMapping("/print-parallel")
+    public ResponseEntity<String> printParallel() {
+        service.printParallel();
+        return ResponseEntity.ok("Printed parallel to console");
+    }
+
+    @GetMapping("/print-synchronized")
+    public ResponseEntity<String> printSynchronized() {
+        service.printSynchronized();
+        return ResponseEntity.ok("Printed synchronized to console");
+    }
 }

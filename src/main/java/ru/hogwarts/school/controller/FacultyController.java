@@ -54,4 +54,18 @@ public class FacultyController {
     public ResponseEntity<List<StudentResponseDto>> getStudents(@PathVariable Long id) {
         return ResponseEntity.ok(service.getStudentsByFacultyId(id));
     }
+
+    @GetMapping("/longest-name")
+    public ResponseEntity<FacultyResponseDto> getFacultyWithLongestName() {
+        FacultyResponseDto dto = service.getFacultyWithLongestName();
+        return ResponseEntity.ok(dto);
+    }
+
+
+    @GetMapping("/start-with-a")
+    public ResponseEntity<List<FacultyResponseDto>> findByNameStartingWithA() {
+        List<FacultyResponseDto> faculties = service.findByNameStartingWithA();
+        return ResponseEntity.ok(faculties);
+    }
+
 }
