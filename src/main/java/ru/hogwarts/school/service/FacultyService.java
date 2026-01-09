@@ -12,7 +12,9 @@ import ru.hogwarts.school.mapper.FacultyMapper;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.repository.FacultyRepository;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -108,4 +110,35 @@ public class FacultyService {
         logger.debug("Returning {} students for faculty id {}", result.size(), facultyId);
         return result;
     }
+
+    public String getLongestFacultyName() {
+        logger.info("Was invoked method for getLongestFacultyName");
+        String longestName = facultyRepository.findAll().stream()
+                .map(Faculty::getName)
+                .filter(Objects::nonNull)
+                .max(Comparator.comparingInt(String::length))
+                .orElse("");
+        logger.debug("Longest faculty name: {}", longestName);
+        return longestName;
+    }
+
+    public List<FacultyResponseDto> findByNameStartingWithA() {
+        logger.info("Was invoked method for findByNameStartingWithA");
+        List<Faculty> faculties = facultyRepository.findAll().stream()
+                .filter(f -> f.getName() != null && f.getName().startsWith("A"))
+                .toList();
+        logger.debug("Found {} faculties starting with 'A'", faculties.size());
+        return faculties.stream().map(mapper::toDto).toList();
+    }
+
+    public FacultyResponseDto getFacultyWithLongestName() {
+        logger.info("Was invoked method for getFacultyWithLongestName");
+        return facultyRepository.findAll().stream()
+                .filter(f -> f.getName() != null)
+                .max(Comparator.comparingInt(f -> f.getName().length()))
+                .map(mapper::toDto)
+                .orElseThrow(() -> new FacultyNotFoundException("No faculties found"));
+    }
+
+
 }
